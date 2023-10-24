@@ -4,29 +4,81 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import demo.demo_rest.entities.BuyedList;
+import demo.demo_rest.entities.Cart;
+import demo.demo_rest.entities.Product;
+import demo.demo_rest.entities.ProductInCart;
+import demo.demo_rest.entities.UserDto;
 import demo.demo_rest.entities.Users;
+import demo.demo_rest.repositories.BuyedListRepository;
+import demo.demo_rest.repositories.CartRepository;
+import demo.demo_rest.repositories.ProductCartRepository;
+import demo.demo_rest.repositories.ProductRepository;
 import demo.demo_rest.repositories.UsersRepository;
 import demo.exceptions.DbIsEmptyException;
+import demo.exceptions.ProductAlreadyExistException;
+import demo.exceptions.ProductDoesNotExistException;
 import demo.exceptions.UserAlreadyExistException;
 import demo.exceptions.UserDoesNotExistException;
 import demo.exceptions.UserIsInvalidException;
 
 @Service
 public class UserService {
-
-
+    
     @Autowired 
     UsersRepository usersRepository;
 
-    public Users addUser(Users u)throws RuntimeException{ 
+    @Autowired
+    CartRepository cartRepository;
+
+    @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
+    ProductCartRepository productCartRepository;
+
+    @Autowired
+    BuyedListRepository buyedListRepository;
+
+    // public Users addUser(Users u)throws RuntimeException{ 
+    //     String regexNome = "^[a-zA-Z]{4,}";
+    //     Cart carrello = new Cart();
+    //     BuyedList bL = new BuyedList();
+        
+    //     if (existByEmail(u.getEmail()) || !u.getName().matches(regexNome)) {
+    //         throw new UserAlreadyExistException();
+    //     }else{
+    //         cartRepository.save(carrello);
+    //         u.setCart(carrello);
+    //         buyedListRepository.save(bL);
+    //         u.setListaProdottiComprati(bL);
+    //         u = usersRepository.save(u);
+    //     }       
+
+    //     return u; 
+    // }
+
+    public UserDto addUser(Users u)throws RuntimeException{ 
         String regexNome = "^[a-zA-Z]{4,}";
+        Cart carrello = new Cart();
+        BuyedList bL = new BuyedList();
+        
         if (existByEmail(u.getEmail()) || !u.getName().matches(regexNome)) {
             throw new UserAlreadyExistException();
         }else{
-            usersRepository.save(u);
+            cartRepository.save(carrello);
+            u.setCart(carrello);
+            buyedListRepository.save(bL);
+            u.setListaProdottiComprati(bL);
+            u = usersRepository.save(u);
         }       
-        return u; 
+        
+        UserDto uDto = new UserDto(u.getId(), u.getEmail());
+
+        return uDto; 
     }
+
 
     public boolean existByEmail(String email){
         return usersRepository.existsByEmail(email);
@@ -54,7 +106,7 @@ public class UserService {
 
     public Users findByEmail(String email)throws RuntimeException{
         if (usersRepository.existsByEmail(email)) {
-            return usersRepository.findByEmail(email);
+            return usersRepository.findByEmail(email).get();
         }else{
             throw new UserDoesNotExistException();
         }
@@ -82,4 +134,8 @@ public class UserService {
             throw new UserIsInvalidException();
         }      
     }
+
+    // public Users modifyPassword(){
+        
+    // }
 }
