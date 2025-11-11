@@ -66,9 +66,7 @@ public class Users implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
-        return List.of(new SimpleGrantedAuthority(role.name()));
-
+        return List.of();
     }
 
     @Override
